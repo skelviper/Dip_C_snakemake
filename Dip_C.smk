@@ -14,6 +14,7 @@ SAMPLES = [i.split(sep='_')[0] for i in os.listdir("./Rawdata")]
 #SAMPLES = ["E752001"]
 
 configfile: "Dip_C_snakemake/config.yaml"
+localrules: all
 
 #############RULE_ALL###############
 
@@ -30,6 +31,10 @@ rule all:
         expand("result/cif_cpg/{sample}.{res}.{rep}.cpg.cif", sample=SAMPLES if config["if_structure"] else [],
             res=["20k","50k","200k","1m"] if config["if_structure"] else [],
             rep=list(range(5)) if config["if_structure"] else []),
+    threads: 20
+    shell:"""
+         bash ./Dip_C_snakemake/scripts/generateStat.sh
+    """
 
 
 #############END_RULE_ALL##############
