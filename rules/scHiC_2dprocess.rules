@@ -27,10 +27,10 @@ rule align2pairs:
         ref_genome={params.ref_genome}
         if_snp={params.if_snp}
         if_ht={params.if_ht}
-        if [ $ref_genome == "rab" ] 
+        if [ $ref_genome == "Mmul10" ] 
         then
             samtools view -h {input.bam} | samtools sort -n -@10 | samtools view -h | {input.hickit}/hickit.js sam2seg - 2> {log.contacts_seg_log} |\
-                {input.hickit}/hickit.js chronly -r NC_06* - | (if [ $if_ht == "False" ]; then sed 's/-/+/g'; else cat; fi) | gzip > {output.contacts_seg}
+                {input.hickit}/hickit.js chronly -r NC_* - | (if [ $if_ht == "False" ]; then sed 's/-/+/g'; else cat; fi) | gzip > {output.contacts_seg}
         else
             yperx=`awk 'BEGIN{{printf "%.6f",('$(samtools view -q 30 {input.bam} chrY |wc -l)'/'$(samtools view -q 30 {input.bam} chrX | wc -l)')}}'`
             echo $yperx > {log.yperx}
@@ -92,7 +92,6 @@ rule cleanPairs:
     output: 
         clean1_pairs= "result/cleaned_pairs/c1/{sample}.pairs.gz",
         clean12_pairs = "result/cleaned_pairs/c12/{sample}.pairs.gz",
-        clean123_pairs = "result/cleaned_pairs/c123/{sample}.pairs.gz",
     threads: config["resources"]["hires_clean_cpu_threads"]
     resources:
         nodes = config["resources"]["hires_clean_cpu_threads"],
@@ -101,7 +100,6 @@ rule cleanPairs:
     shell:"""
         mkdir -p result/cleaned_pairs/c1
         mkdir -p result/cleaned_pairs/c12
-        mkdir -p result/cleaned_pairs/c123
 
         python {input.charmtools} clean_leg -t {threads} {input.contacts_pairs} -o {output.clean1_pairs}
         python {input.charmtools} clean_isolated -t {threads} -o {output.clean12_pairs} {output.clean1_pairs}
@@ -113,7 +111,7 @@ rule cleanPairs:
 rule hickit_2d:
     input:
         hickit = config["softwares"]["HICKIT"],
-        cleaned_pairs = rules.cleanPairs.output.clean123_pairs,
+        cleaned_pairs = rules.cleanPairs.output.clean12_pairs,
     output:
         impute_pairs = "result/impute/pairs/{sample}.impute.pairs.gz",
         impute_val = "result/impute/val/{sample}.impute.val",

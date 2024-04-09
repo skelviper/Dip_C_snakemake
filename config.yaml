@@ -1,6 +1,6 @@
 if_snp: False
 if_ht: False
-if_structure: True
+if_structure: False
 
 ref_genome: Mmul10 # GRCm38 or GRCh37d5
 yperx_threshold: 0.015 # GM12878 is all female,set a bigger value
